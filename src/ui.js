@@ -304,6 +304,25 @@
         return true;
       }
     }
+
+    // Completed livestreams lose the LIVE badge and are labeled in the date
+    // metadata instead (for example, "Streamed 7d ago"). Keep this scoped to
+    // metadata/date elements so a video title containing "streamed" does not
+    // get filtered accidentally. Cover both the current view-model DOM and
+    // YouTube's legacy ytd-video-meta-block markup.
+    const dateAreas = card.querySelectorAll(
+      ".ytContentMetadataViewModelMetadataTextLastPart, " +
+      ".ytContentMetadataViewModelMetadataRow span.ytAttributedStringHost, " +
+      "#metadata-line .inline-metadata-item, " +
+      "#metadata-line > span"
+    );
+    for (const area of dateAreas) {
+      const text = (area.textContent || "").replace(/\s+/g, " ").trim();
+      const label = area.getAttribute("aria-label") || "";
+      if (/\bstreamed\b/i.test(text) || /\bstreamed\b/i.test(label)) {
+        return true;
+      }
+    }
     return false;
   }
 

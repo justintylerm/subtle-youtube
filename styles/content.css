@@ -1,4 +1,4 @@
-/* YouTube Latest Subs — injected toolbar + CSS overrides on YouTube's native
+/* Subtle for YouTube — injected toolbar + CSS overrides on YouTube's native
    subscriptions feed. Clean/minimal modes hide shelves + chips and restyle the
    native rich-grid; native mode leaves the page untouched. */
 
@@ -304,10 +304,21 @@ html.yls-on-subs.yls-clean-mode.yls-grid-hide-avatars ytd-rich-item-renderer .yt
 html.yls-on-subs.yls-clean-mode.yls-grid-hide-view-counts ytd-rich-item-renderer .ytContentMetadataViewModelMetadataRow > .ytContentMetadataViewModelDelimiter:has(+ .ytContentMetadataViewModelLeadingIcon),
 html.yls-on-subs.yls-clean-mode.yls-grid-hide-view-counts ytd-rich-item-renderer .ytContentMetadataViewModelMetadataRow > .ytContentMetadataViewModelLeadingIcon,
 html.yls-on-subs.yls-clean-mode.yls-grid-hide-view-counts ytd-rich-item-renderer .ytContentMetadataViewModelMetadataRow > .ytContentMetadataViewModelLeadingIcon + span.ytAttributedStringHost,
+html.yls-on-subs.yls-clean-mode.yls-grid-hide-view-counts ytd-rich-item-renderer .ytContentMetadataViewModelMetadataRow > .ytContentMetadataViewModelDelimiter:has(+ .ytIconWrapperHost.ytContentMetadataViewModelIcon path[d^="M5 4.623"]),
+html.yls-on-subs.yls-clean-mode.yls-grid-hide-view-counts ytd-rich-item-renderer .ytIconWrapperHost.ytContentMetadataViewModelIcon:has(path[d^="M5 4.623"]),
+html.yls-on-subs.yls-clean-mode.yls-grid-hide-view-counts ytd-rich-item-renderer .ytIconWrapperHost.ytContentMetadataViewModelIcon:has(path[d^="M5 4.623"]) + span.ytAttributedStringHost,
 html.yls-on-subs.yls-minimal-mode ytd-rich-item-renderer .ytContentMetadataViewModelMetadataRow > .ytContentMetadataViewModelDelimiter:has(+ .ytContentMetadataViewModelLeadingIcon),
 html.yls-on-subs.yls-minimal-mode ytd-rich-item-renderer .ytContentMetadataViewModelMetadataRow > .ytContentMetadataViewModelLeadingIcon,
-html.yls-on-subs.yls-minimal-mode ytd-rich-item-renderer .ytContentMetadataViewModelMetadataRow > .ytContentMetadataViewModelLeadingIcon + span.ytAttributedStringHost {
+html.yls-on-subs.yls-minimal-mode ytd-rich-item-renderer .ytContentMetadataViewModelMetadataRow > .ytContentMetadataViewModelLeadingIcon + span.ytAttributedStringHost,
+html.yls-on-subs.yls-minimal-mode ytd-rich-item-renderer .ytContentMetadataViewModelMetadataRow > .ytContentMetadataViewModelDelimiter:has(+ .ytIconWrapperHost.ytContentMetadataViewModelIcon path[d^="M5 4.623"]),
+html.yls-on-subs.yls-minimal-mode ytd-rich-item-renderer .ytIconWrapperHost.ytContentMetadataViewModelIcon:has(path[d^="M5 4.623"]),
+html.yls-on-subs.yls-minimal-mode ytd-rich-item-renderer .ytIconWrapperHost.ytContentMetadataViewModelIcon:has(path[d^="M5 4.623"]) + span.ytAttributedStringHost {
   display: none !important;
+  width: 0 !important;
+  min-width: 0 !important;
+  height: 0 !important;
+  margin: 0 !important;
+  padding: 0 !important;
 }
 /* Older two-row DOM ("views · time ago" in its own row): hide the first span
    (views) AND the delimiter, keeping the last span (time). Scoped to rows
@@ -581,12 +592,33 @@ html.yls-on-subs.yls-minimal-mode ytd-rich-item-renderer .ytContentMetadataViewM
   display: none !important;
 }
 
-/* ---- Nuke the yt-icon-shape badge element on cards in grid + list views.
-   YT's current view-model uses <div class="yt-icon-shape ytSpecIconShapeHost">
-   for the verified-channel checkmark on the channel name line. */
-html.yls-on-subs.yls-clean-mode.yls-grid-hide-verified-badges ytd-rich-item-renderer .ytContentMetadataViewModelMetadataRow .yt-icon-shape.ytSpecIconShapeHost,
-html.yls-on-subs.yls-minimal-mode ytd-rich-item-renderer .yt-icon-shape.ytSpecIconShapeHost {
+/* ---- Remove the complete verified-badge wrapper in grid + list views.
+   YouTube's current badge-shape markup adds spacing on multiple ancestors, so
+   hiding only the inner checkmark leaves a blank gap after the channel name.
+   Collapse every verified-only wrapper. Do not target generic icon shapes:
+   the views indicator now uses the same inner icon class. */
+html.yls-on-subs.yls-clean-mode.yls-grid-hide-verified-badges ytd-rich-item-renderer .ytBadgeSupportedRendererBadgeShapeStyleTypeVerifiedArtist,
+html.yls-on-subs.yls-clean-mode.yls-grid-hide-verified-badges ytd-rich-item-renderer ytd-badge-supported-renderer:has(badge-shape[aria-label="Verified"]),
+html.yls-on-subs.yls-clean-mode.yls-grid-hide-verified-badges ytd-rich-item-renderer yt-badge-supported-renderer:has(badge-shape[aria-label="Verified"]),
+html.yls-on-subs.yls-clean-mode.yls-grid-hide-verified-badges ytd-rich-item-renderer yt-metadata-badge-renderer:has(badge-shape[aria-label="Verified"]),
+html.yls-on-subs.yls-clean-mode.yls-grid-hide-verified-badges ytd-rich-item-renderer .ytContentMetadataViewModelBadgeContainer:has(badge-shape[aria-label="Verified"]),
+html.yls-on-subs.yls-clean-mode.yls-grid-hide-verified-badges ytd-rich-item-renderer .ytContentMetadataViewModelBadge:has(badge-shape[aria-label="Verified"]),
+html.yls-on-subs.yls-clean-mode.yls-grid-hide-verified-badges ytd-rich-item-renderer .ytIconWrapperHost.ytContentMetadataViewModelIcon[aria-label="Verified"],
+html.yls-on-subs.yls-clean-mode.yls-grid-hide-verified-badges ytd-rich-item-renderer badge-shape[aria-label="Verified"],
+html.yls-on-subs.yls-minimal-mode ytd-rich-item-renderer .ytBadgeSupportedRendererBadgeShapeStyleTypeVerifiedArtist,
+html.yls-on-subs.yls-minimal-mode ytd-rich-item-renderer ytd-badge-supported-renderer:has(badge-shape[aria-label="Verified"]),
+html.yls-on-subs.yls-minimal-mode ytd-rich-item-renderer yt-badge-supported-renderer:has(badge-shape[aria-label="Verified"]),
+html.yls-on-subs.yls-minimal-mode ytd-rich-item-renderer yt-metadata-badge-renderer:has(badge-shape[aria-label="Verified"]),
+html.yls-on-subs.yls-minimal-mode ytd-rich-item-renderer .ytContentMetadataViewModelBadgeContainer:has(badge-shape[aria-label="Verified"]),
+html.yls-on-subs.yls-minimal-mode ytd-rich-item-renderer .ytContentMetadataViewModelBadge:has(badge-shape[aria-label="Verified"]),
+html.yls-on-subs.yls-minimal-mode ytd-rich-item-renderer .ytIconWrapperHost.ytContentMetadataViewModelIcon[aria-label="Verified"],
+html.yls-on-subs.yls-minimal-mode ytd-rich-item-renderer badge-shape[aria-label="Verified"] {
   display: none !important;
+  width: 0 !important;
+  min-width: 0 !important;
+  height: 0 !important;
+  margin: 0 !important;
+  padding: 0 !important;
 }
 
 /* ---- Title: single line, ellipsis (view-model + legacy) ---- */

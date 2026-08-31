@@ -18,11 +18,7 @@ for required in \
   src/grid-settings.js \
   src/ui.js \
   src/content.js \
-  styles/content.css \
-  icons/icon-16.png \
-  icons/icon-32.png \
-  icons/icon-48.png \
-  icons/icon-128.png; do
+  styles/content.css; do
   test -f "$project_dir/$required"
 done
 

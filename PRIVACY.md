@@ -2,7 +2,7 @@
 
 **Effective date:** August 30, 2026
 
-Latest Subs for YouTube is designed to work entirely in your browser.
+Subtle for YouTube is designed to work entirely in your browser.
 
 ## Data collection
 
@@ -22,4 +22,4 @@ Material changes to this policy will be documented in the repository and include
 
 ## Contact
 
-Questions can be opened as a [GitHub issue](https://github.com/justintylerm/youtube-latest-subscriptions/issues).
+Questions can be opened as a [GitHub issue](https://github.com/justintylerm/subtle-youtube/issues).
