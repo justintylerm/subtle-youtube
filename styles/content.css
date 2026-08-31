@@ -1,0 +1,677 @@
+/* YouTube Latest Subs — injected toolbar + CSS overrides on YouTube's native
+   subscriptions feed. Clean/minimal modes hide shelves + chips and restyle the
+   native rich-grid; native mode leaves the page untouched. */
+
+/* ===========================================================================
+   Toolbar (mounted inside ytd-masthead #end, left of the Create button)
+   =========================================================================== */
+#yt-latest-root {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin: 0 12px;
+  padding: 0;
+  background: transparent;
+  border: none;
+  border-radius: 0;
+  color: var(--yt-spec-text-primary, #f1f1f1);
+  font-family: "Roboto", "Arial", sans-serif;
+  box-sizing: border-box;
+  /* match the height of YT's masthead buttons */
+  height: 40px;
+  flex-shrink: 0;
+}
+#yt-latest-root * { box-sizing: border-box; }
+
+/* Mobile uses YouTube's untouched native UI and feed. */
+html.yls-mobile-disabled #yt-latest-root {
+  display: none !important;
+}
+
+/* YouTube's own ytSpecButtonShapeNext* classes provide the surface, hover,
+   pressed state, backdrop blur, theme colors, and current UI experiments.
+   Keep only the layout rules that are unique to this extension. */
+.yls-btn {
+  appearance: none;
+  position: relative;
+  flex: 0 0 auto;
+  height: 40px;
+  padding: 0 16px;
+  border-radius: 20px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  white-space: nowrap;
+}
+.yls-btn:focus-visible {
+  outline: 2px solid var(--yt-spec-call-to-action, #3ea6ff);
+  outline-offset: 2px;
+}
+.yls-btn:disabled { opacity: 0.6; cursor: default; }
+
+/* Keep the view selector visible throughout YouTube. Changing it away from
+   subscriptions updates the saved preference for the next subscriptions
+   visit without affecting the current page. */
+.yls-modedrop { position: relative; }
+.yls-modedrop-trigger {
+  min-width: 0;
+  white-space: nowrap;
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+}
+.yls-modedrop-trigger .trigger-label { white-space: nowrap; }
+.yls-modedrop-trigger .trigger-icon,
+.yls-modedrop-trigger .caret {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+}
+.yls-modedrop-trigger .trigger-icon svg {
+  width: 18px;
+  height: 18px;
+  stroke-width: 1.8;
+}
+.yls-modedrop-trigger .caret svg { width: 12px; height: 12px; opacity: 0.72; }
+.yls-modedrop-trigger .caret { transition: transform 0.18s ease; }
+.yls-modedrop[aria-expanded="true"] .yls-modedrop-trigger .caret { transform: rotate(180deg); }
+
+.yls-modedrop-menu {
+  position: absolute;
+  right: 0;
+  top: calc(100% + 6px);
+  min-width: 240px;
+  background: var(--yt-spec-menu-background, #272727);
+  border: 1px solid var(--yt-spec-10-percent-layer, rgba(255, 255, 255, 0.08));
+  border-radius: 12px;
+  padding: 6px;
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.5);
+  display: none;
+  z-index: 3000;
+}
+.yls-modedrop[aria-expanded="true"] .yls-modedrop-menu { display: block; }
+
+.yls-modedrop-item {
+  display: grid;
+  grid-template-columns: 20px 1fr auto;
+  gap: 12px;
+  align-items: center;
+  padding: 10px 12px;
+  border-radius: 8px;
+  cursor: pointer;
+  color: var(--yt-spec-text-primary, #f1f1f1);
+}
+.yls-modedrop-item:hover { background: var(--yt-spec-10-percent-layer, rgba(255, 255, 255, 0.10)); }
+.yls-modedrop-item .icon {
+  color: var(--yt-spec-text-secondary, #aaa);
+  display: grid; place-items: center;
+}
+.yls-modedrop-item .icon svg { width: 18px; height: 18px; }
+.yls-modedrop-item .meta { display: flex; flex-direction: column; gap: 2px; min-width: 0; }
+.yls-modedrop-item .meta-label { font-size: 14px; font-weight: 500; }
+.yls-modedrop-item .meta-hint { font-size: 12px; color: var(--yt-spec-text-secondary, #aaa); }
+.yls-modedrop-item .check {
+  color: var(--yt-spec-text-primary, #f1f1f1);
+  opacity: 0;
+  display: inline-flex; align-items: center; justify-content: center;
+}
+.yls-modedrop-item[aria-selected="true"] .check { opacity: 1; }
+.yls-modedrop-item[aria-selected="true"] .icon { color: var(--yt-spec-text-primary, #f1f1f1); }
+
+/* Grayscale toggle */
+.yls-grayscale-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 40px;
+  padding: 0;
+  color: #fff !important;
+  transition: background 0.1s ease;
+}
+.yls-grayscale-btn svg {
+  width: 18px;
+  height: 18px;
+  stroke-width: 1.8;
+  color: #fff !important;
+  opacity: 1;
+}
+
+/* Preserve separation from YouTube's search/voice controls and native
+   masthead controls. At narrow widths, collapse the view selector to its
+   grid/list/default icon so the toolbar cannot crowd neighboring controls. */
+@media (max-width: 1100px) {
+  #yt-latest-root {
+    gap: 10px;
+    margin-left: 12px;
+    margin-right: 10px;
+  }
+
+  .yls-modedrop-trigger {
+    width: 40px;
+    padding: 0;
+  }
+
+  .yls-modedrop-trigger .trigger-label,
+  .yls-modedrop-trigger .caret {
+    display: none;
+  }
+}
+
+@media (max-width: 760px) {
+  #yt-latest-root {
+    gap: 8px;
+    margin-left: 8px;
+    margin-right: 8px;
+  }
+}
+
+/* Hide sidebar channel "new video" dots in non-native modes */
+html.yls-on-subs.yls-clean-mode ytd-guide-entry-renderer #newness-dot,
+html.yls-on-subs.yls-clean-mode ytd-mini-guide-entry-renderer .guide-newness-dot,
+html.yls-on-subs.yls-clean-mode ytd-guide-entry-renderer .guide-newness-dot,
+html.yls-on-subs.yls-minimal-mode ytd-guide-entry-renderer #newness-dot,
+html.yls-on-subs.yls-minimal-mode ytd-mini-guide-entry-renderer .guide-newness-dot,
+html.yls-on-subs.yls-minimal-mode ytd-guide-entry-renderer .guide-newness-dot {
+  display: none !important;
+}
+
+/* ===========================================================================
+   Clean + Minimal shared hiding
+   ===========================================================================
+   Hide filter chips, Shorts shelves, "Show more" continuation, and any other
+   non-video shelves on the subs page. Keep only ytd-rich-item-renderer grid
+   items (individual videos). */
+
+/* Chip bar + page header fluff */
+html.yls-on-subs.yls-clean-mode ytd-browse:is([page-subtype="subscriptions"], [page-subtype="home"]) ytd-feed-filter-chip-bar-renderer,
+html.yls-on-subs.yls-clean-mode ytd-browse:is([page-subtype="subscriptions"], [page-subtype="home"]) #header.ytd-rich-grid-renderer,
+html.yls-on-subs.yls-minimal-mode ytd-browse:is([page-subtype="subscriptions"], [page-subtype="home"]) ytd-feed-filter-chip-bar-renderer,
+html.yls-on-subs.yls-minimal-mode ytd-browse:is([page-subtype="subscriptions"], [page-subtype="home"]) #header.ytd-rich-grid-renderer {
+  display: none !important;
+}
+
+/* Shelves: Shorts reel, mixed shelves, "Recent posts", etc. */
+html.yls-on-subs.yls-clean-mode ytd-browse:is([page-subtype="subscriptions"], [page-subtype="home"]) ytd-rich-section-renderer,
+html.yls-on-subs.yls-clean-mode ytd-browse:is([page-subtype="subscriptions"], [page-subtype="home"]) ytd-rich-shelf-renderer,
+html.yls-on-subs.yls-clean-mode ytd-browse:is([page-subtype="subscriptions"], [page-subtype="home"]) ytd-reel-shelf-renderer,
+html.yls-on-subs.yls-clean-mode ytd-browse:is([page-subtype="subscriptions"], [page-subtype="home"]) ytd-shelf-renderer,
+html.yls-on-subs.yls-minimal-mode ytd-browse:is([page-subtype="subscriptions"], [page-subtype="home"]) ytd-rich-section-renderer,
+html.yls-on-subs.yls-minimal-mode ytd-browse:is([page-subtype="subscriptions"], [page-subtype="home"]) ytd-rich-shelf-renderer,
+html.yls-on-subs.yls-minimal-mode ytd-browse:is([page-subtype="subscriptions"], [page-subtype="home"]) ytd-reel-shelf-renderer,
+html.yls-on-subs.yls-minimal-mode ytd-browse:is([page-subtype="subscriptions"], [page-subtype="home"]) ytd-shelf-renderer {
+  display: none !important;
+}
+
+/* Continuation ("Show more") spinner/button */
+html.yls-on-subs.yls-clean-mode ytd-browse:is([page-subtype="subscriptions"], [page-subtype="home"]) ytd-continuation-item-renderer,
+html.yls-on-subs.yls-minimal-mode ytd-browse:is([page-subtype="subscriptions"], [page-subtype="home"]) ytd-continuation-item-renderer {
+  display: none !important;
+}
+
+/* Also hide rich-items that are Shorts (some YouTube builds use rich-items
+   with an is-shorts attr instead of a shelf renderer). */
+html.yls-on-subs.yls-clean-mode ytd-browse:is([page-subtype="subscriptions"], [page-subtype="home"]) ytd-rich-item-renderer[is-shorts],
+html.yls-on-subs.yls-minimal-mode ytd-browse:is([page-subtype="subscriptions"], [page-subtype="home"]) ytd-rich-item-renderer[is-shorts] {
+  display: none !important;
+}
+
+/* Combo/collaboration uploads are filtered from the two custom feeds.
+   Default mode intentionally preserves YouTube's complete native feed. */
+html.yls-on-subs.yls-clean-mode.yls-grid-hide-collaborations ytd-browse:is([page-subtype="subscriptions"], [page-subtype="home"]) ytd-rich-item-renderer.yls-combo-upload,
+html.yls-on-subs.yls-minimal-mode ytd-browse:is([page-subtype="subscriptions"], [page-subtype="home"]) ytd-rich-item-renderer.yls-combo-upload {
+  display: none !important;
+}
+
+/* Livestreams are classified separately from collaboration uploads so each
+   can be controlled independently in Grid settings. */
+html.yls-on-subs.yls-clean-mode.yls-grid-hide-live-streams ytd-browse:is([page-subtype="subscriptions"], [page-subtype="home"]) ytd-rich-item-renderer.yls-live-upload {
+  display: none !important;
+}
+
+/* ===========================================================================
+   Clean mode — 3-column native grid
+   ===========================================================================
+   YouTube uses CSS vars + flex-wrap in some builds and a ytd-rich-grid-row
+   wrapper in others, so we override both. */
+html.yls-on-subs.yls-clean-mode ytd-browse:is([page-subtype="subscriptions"], [page-subtype="home"]) ytd-rich-grid-renderer {
+  --ytd-rich-grid-items-per-row: 3 !important;
+  --ytd-rich-grid-posts-per-row: 3 !important;
+  --ytd-rich-grid-slim-items-per-row: 3 !important;
+  --ytd-rich-grid-mini-items-per-row: 3 !important;
+  --ytd-rich-grid-item-max-width: none !important;
+  --ytd-rich-grid-item-margin: 8px !important;
+}
+
+/* Flat structure: rich-items are direct children of #contents */
+html.yls-on-subs.yls-clean-mode ytd-browse:is([page-subtype="subscriptions"], [page-subtype="home"]) ytd-rich-grid-renderer > #contents {
+  display: grid !important;
+  grid-template-columns: repeat(3, minmax(0, 1fr)) !important;
+  gap: 16px !important;
+}
+/* Row-wrapped structure: rich-items inside ytd-rich-grid-row > #contents */
+html.yls-on-subs.yls-clean-mode ytd-browse:is([page-subtype="subscriptions"], [page-subtype="home"]) ytd-rich-grid-row {
+  width: 100% !important;
+  max-width: none !important;
+  margin: 0 !important;
+}
+html.yls-on-subs.yls-clean-mode ytd-browse:is([page-subtype="subscriptions"], [page-subtype="home"]) ytd-rich-grid-row > #contents {
+  display: grid !important;
+  grid-template-columns: repeat(3, minmax(0, 1fr)) !important;
+  gap: 16px !important;
+}
+/* Force every rich-item to fill its grid cell */
+html.yls-on-subs.yls-clean-mode ytd-browse:is([page-subtype="subscriptions"], [page-subtype="home"]) ytd-rich-item-renderer {
+  width: 100% !important;
+  max-width: none !important;
+  min-width: 0 !important;
+  margin: 0 !important;
+}
+
+@media (max-width: 1100px) {
+  html.yls-on-subs.yls-clean-mode ytd-browse:is([page-subtype="subscriptions"], [page-subtype="home"]) ytd-rich-grid-renderer > #contents,
+  html.yls-on-subs.yls-clean-mode ytd-browse:is([page-subtype="subscriptions"], [page-subtype="home"]) ytd-rich-grid-row > #contents {
+    grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
+  }
+}
+@media (max-width: 720px) {
+  html.yls-on-subs.yls-clean-mode ytd-browse:is([page-subtype="subscriptions"], [page-subtype="home"]) ytd-rich-grid-renderer > #contents,
+  html.yls-on-subs.yls-clean-mode ytd-browse:is([page-subtype="subscriptions"], [page-subtype="home"]) ytd-rich-grid-row > #contents {
+    grid-template-columns: 1fr !important;
+  }
+}
+
+/* ---- Clean mode: hide channel avatar under thumbnail ----
+   Modern view-model DOM uses .ytLockupMetadataViewModelAvatar;
+   legacy Polymer DOM uses #avatar-link / #avatar-container. */
+html.yls-on-subs.yls-clean-mode.yls-grid-hide-avatars ytd-rich-item-renderer .ytLockupMetadataViewModelAvatar,
+html.yls-on-subs.yls-clean-mode.yls-grid-hide-avatars ytd-rich-item-renderer yt-decorated-avatar-view-model,
+html.yls-on-subs.yls-clean-mode.yls-grid-hide-avatars ytd-rich-item-renderer #avatar-link,
+html.yls-on-subs.yls-clean-mode.yls-grid-hide-avatars ytd-rich-item-renderer #avatar-container,
+html.yls-on-subs.yls-clean-mode.yls-grid-hide-avatars ytd-rich-item-renderer yt-avatar-shape,
+html.yls-on-subs.yls-clean-mode.yls-grid-hide-avatars ytd-rich-item-renderer .yt-spec-avatar-shape {
+  display: none !important;
+  width: 0 !important;
+  height: 0 !important;
+  margin: 0 !important;
+}
+
+/* ---- Hide view count in clean + minimal modes ----
+   Current view-model DOM collapses metadata to ONE row per card:
+   channel · [▶] views · time — the views span sits right after the
+   ▶ leading-icon wrapper. Hide the leading icon, the views span, and the
+   delimiter just before them, keeping "Channel   time". */
+html.yls-on-subs.yls-clean-mode.yls-grid-hide-view-counts ytd-rich-item-renderer .ytContentMetadataViewModelMetadataRow > .ytContentMetadataViewModelDelimiter:has(+ .ytContentMetadataViewModelLeadingIcon),
+html.yls-on-subs.yls-clean-mode.yls-grid-hide-view-counts ytd-rich-item-renderer .ytContentMetadataViewModelMetadataRow > .ytContentMetadataViewModelLeadingIcon,
+html.yls-on-subs.yls-clean-mode.yls-grid-hide-view-counts ytd-rich-item-renderer .ytContentMetadataViewModelMetadataRow > .ytContentMetadataViewModelLeadingIcon + span.ytAttributedStringHost,
+html.yls-on-subs.yls-minimal-mode ytd-rich-item-renderer .ytContentMetadataViewModelMetadataRow > .ytContentMetadataViewModelDelimiter:has(+ .ytContentMetadataViewModelLeadingIcon),
+html.yls-on-subs.yls-minimal-mode ytd-rich-item-renderer .ytContentMetadataViewModelMetadataRow > .ytContentMetadataViewModelLeadingIcon,
+html.yls-on-subs.yls-minimal-mode ytd-rich-item-renderer .ytContentMetadataViewModelMetadataRow > .ytContentMetadataViewModelLeadingIcon + span.ytAttributedStringHost {
+  display: none !important;
+}
+/* Older two-row DOM ("views · time ago" in its own row): hide the first span
+   (views) AND the delimiter, keeping the last span (time). Scoped to rows
+   without a leading icon so it can't touch the single-row format above,
+   where the first span is the channel name. */
+html.yls-on-subs.yls-clean-mode.yls-grid-hide-view-counts ytd-rich-item-renderer .ytContentMetadataViewModelMetadataRow:has(> .ytContentMetadataViewModelDelimiter):not(:has(> .ytContentMetadataViewModelLeadingIcon)) > span.ytAttributedStringHost:first-child,
+html.yls-on-subs.yls-clean-mode.yls-grid-hide-view-counts ytd-rich-item-renderer .ytContentMetadataViewModelMetadataRow:has(> .ytContentMetadataViewModelDelimiter):not(:has(> .ytContentMetadataViewModelLeadingIcon)) > .ytContentMetadataViewModelDelimiter,
+html.yls-on-subs.yls-minimal-mode ytd-rich-item-renderer .ytContentMetadataViewModelMetadataRow:has(> .ytContentMetadataViewModelDelimiter):not(:has(> .ytContentMetadataViewModelLeadingIcon)) > span.ytAttributedStringHost:first-child,
+html.yls-on-subs.yls-minimal-mode ytd-rich-item-renderer .ytContentMetadataViewModelMetadataRow:has(> .ytContentMetadataViewModelDelimiter):not(:has(> .ytContentMetadataViewModelLeadingIcon)) > .ytContentMetadataViewModelDelimiter {
+  display: none !important;
+}
+/* Legacy Polymer fallback */
+html.yls-on-subs.yls-clean-mode.yls-grid-hide-view-counts ytd-rich-item-renderer #metadata-line span:first-child,
+html.yls-on-subs.yls-minimal-mode ytd-rich-item-renderer #metadata-line span:first-child {
+  display: none !important;
+}
+html.yls-on-subs.yls-clean-mode.yls-grid-hide-view-counts ytd-rich-item-renderer #metadata-line span:nth-child(2)::before,
+html.yls-on-subs.yls-minimal-mode ytd-rich-item-renderer #metadata-line span:nth-child(2)::before {
+  content: "" !important;
+  display: none !important;
+}
+
+/* ---- Clean mode: kill all card hover affordances ----
+   No inline-player scrubbing, no hover overlays, no animated-GIF previews,
+   no Watch-Later / Queue chips, no "keep hovering to play" hint, no kebab
+   menu, no thumbnail zoom transform, no progress bar. Static cards only. */
+html.yls-on-subs.yls-clean-mode.yls-grid-disable-hover ytd-video-preview,
+html.yls-on-subs.yls-clean-mode.yls-grid-disable-hover ytd-moving-thumbnail-renderer,
+html.yls-on-subs.yls-clean-mode.yls-grid-disable-hover yt-inline-player-view-model,
+html.yls-on-subs.yls-clean-mode.yls-grid-disable-hover ytd-inline-player-renderer,
+html.yls-on-subs.yls-clean-mode.yls-grid-disable-hover #inline-player,
+html.yls-on-subs.yls-clean-mode.yls-grid-disable-hover #mouseover-overlay,
+html.yls-on-subs.yls-clean-mode.yls-grid-disable-hover yt-thumbnail-hover-overlay-view-model,
+html.yls-on-subs.yls-clean-mode.yls-grid-disable-hover.ytThumbnailHoverOverlayViewModelHost,
+html.yls-on-subs.yls-clean-mode.yls-grid-disable-hover ytd-thumbnail-overlay-toggle-button-renderer,
+html.yls-on-subs.yls-clean-mode.yls-grid-disable-hover ytd-thumbnail-overlay-now-playing-renderer,
+html.yls-on-subs.yls-clean-mode.yls-grid-disable-hover ytd-thumbnail-overlay-hover-text-renderer,
+html.yls-on-subs.yls-clean-mode.yls-grid-disable-hover ytd-thumbnail-overlay-loading-preview-renderer,
+html.yls-on-subs.yls-clean-mode.yls-grid-disable-hover ytd-thumbnail-overlay-equalizer,
+html.yls-on-subs.yls-clean-mode.yls-grid-disable-hover yt-thumbnail-overlay-toggle-button-view-model,
+html.yls-on-subs.yls-clean-mode.yls-grid-disable-hover yt-touch-feedback-shape,
+html.yls-on-subs.yls-clean-mode.yls-grid-disable-hover ytd-rich-item-renderer .ytLockupMetadataViewModelMenuButton,
+html.yls-on-subs.yls-clean-mode.yls-grid-disable-hover yt-thumbnail-overlay-progress-bar-view-model,
+html.yls-on-subs.yls-clean-mode.yls-grid-disable-hover.ytThumbnailOverlayProgressBarHost,
+html.yls-on-subs.yls-clean-mode.yls-grid-disable-hover ytd-thumbnail-overlay-resume-playback-renderer {
+  display: none !important;
+}
+
+/* Kill thumbnail hover zoom/scale transforms some YT builds apply */
+html.yls-on-subs.yls-clean-mode.yls-grid-disable-hover ytd-rich-item-renderer:hover img.ytCoreImageHost,
+html.yls-on-subs.yls-clean-mode.yls-grid-disable-hover ytd-rich-item-renderer:hover yt-thumbnail-view-model,
+html.yls-on-subs.yls-clean-mode.yls-grid-disable-hover ytd-rich-item-renderer:hover ytd-thumbnail,
+html.yls-on-subs.yls-clean-mode.yls-grid-disable-hover ytd-rich-item-renderer:hover a.ytLockupViewModelContentImage {
+  transform: none !important;
+  scale: 1 !important;
+}
+
+/* Lock the title color to primary text regardless of hover state anywhere
+   in the card chain. */
+html.yls-on-subs.yls-clean-mode.yls-grid-disable-hover ytd-rich-item-renderer a.ytLockupMetadataViewModelTitle,
+html.yls-on-subs.yls-clean-mode.yls-grid-disable-hover ytd-rich-item-renderer a.ytLockupMetadataViewModelTitle *,
+html.yls-on-subs.yls-clean-mode.yls-grid-disable-hover ytd-rich-item-renderer a.ytLockupMetadataViewModelTitle:hover,
+html.yls-on-subs.yls-clean-mode.yls-grid-disable-hover ytd-rich-item-renderer a.ytLockupMetadataViewModelTitle:hover *,
+html.yls-on-subs.yls-clean-mode.yls-grid-disable-hover ytd-rich-item-renderer:hover a.ytLockupMetadataViewModelTitle,
+html.yls-on-subs.yls-clean-mode.yls-grid-disable-hover ytd-rich-item-renderer:hover a.ytLockupMetadataViewModelTitle * {
+  color: var(--yt-spec-text-primary, #f1f1f1) !important;
+  text-decoration: none !important;
+  background-color: transparent !important;
+}
+
+/* Lock channel name + timestamp (metadata rows) to secondary text regardless
+   of hover state. Covers both link and span variants inside metadata rows. */
+html.yls-on-subs.yls-clean-mode.yls-grid-disable-hover ytd-rich-item-renderer .ytContentMetadataViewModelMetadataRow,
+html.yls-on-subs.yls-clean-mode.yls-grid-disable-hover ytd-rich-item-renderer .ytContentMetadataViewModelMetadataRow *,
+html.yls-on-subs.yls-clean-mode.yls-grid-disable-hover ytd-rich-item-renderer .ytContentMetadataViewModelMetadataRow:hover,
+html.yls-on-subs.yls-clean-mode.yls-grid-disable-hover ytd-rich-item-renderer .ytContentMetadataViewModelMetadataRow:hover *,
+html.yls-on-subs.yls-clean-mode.yls-grid-disable-hover ytd-rich-item-renderer .ytContentMetadataViewModelMetadataRow a,
+html.yls-on-subs.yls-clean-mode.yls-grid-disable-hover ytd-rich-item-renderer .ytContentMetadataViewModelMetadataRow a:hover,
+html.yls-on-subs.yls-clean-mode.yls-grid-disable-hover ytd-rich-item-renderer .ytContentMetadataViewModelMetadataRow a:hover *,
+html.yls-on-subs.yls-clean-mode.yls-grid-disable-hover ytd-rich-item-renderer:hover .ytContentMetadataViewModelMetadataRow,
+html.yls-on-subs.yls-clean-mode.yls-grid-disable-hover ytd-rich-item-renderer:hover .ytContentMetadataViewModelMetadataRow *,
+html.yls-on-subs.yls-clean-mode.yls-grid-disable-hover ytd-rich-item-renderer:hover .ytContentMetadataViewModelMetadataRow a,
+html.yls-on-subs.yls-clean-mode.yls-grid-disable-hover ytd-rich-item-renderer:hover .ytContentMetadataViewModelMetadataRow a * {
+  color: var(--yt-spec-text-secondary, #aaa) !important;
+  text-decoration: none !important;
+  background-color: transparent !important;
+}
+
+/* Strip any color transitions */
+html.yls-on-subs.yls-clean-mode.yls-grid-disable-hover ytd-rich-item-renderer a,
+html.yls-on-subs.yls-clean-mode.yls-grid-disable-hover ytd-rich-item-renderer a *,
+html.yls-on-subs.yls-clean-mode.yls-grid-disable-hover ytd-rich-item-renderer .ytAttributedStringLink,
+html.yls-on-subs.yls-clean-mode.yls-grid-disable-hover ytd-rich-item-renderer .ytAttributedStringHost,
+html.yls-on-subs.yls-clean-mode.yls-grid-disable-hover ytd-rich-item-renderer .ytContentMetadataViewModelMetadataText {
+  transition: none !important;
+}
+
+/* ---- Global grayscale ----
+   Filter individual paint elements (img, video, svg) rather than page-level
+   containers — containers create stacking contexts that interact badly with
+   YouTube's sticky chip bar, tooltip popups, and other z-index-sensitive UI
+   on home / channel / watch pages. This catches 95% of color (thumbnails,
+   avatars, banners, icons, logos, verified checkmarks, the YouTube logo)
+   without touching layout. */
+html.yls-grayscale img,
+html.yls-grayscale video,
+html.yls-grayscale svg {
+  filter: grayscale(1) !important;
+  transition: filter 0.3s ease;
+}
+
+/* On the subs page specifically we control the layout, so it's safe to
+   apply a broader filter on the main content column + masthead content to
+   catch emoji glyphs and CSS-background badges as well. */
+html.yls-grayscale.yls-on-subs ytd-page-manager,
+html.yls-grayscale.yls-on-subs ytd-masthead #container {
+  filter: grayscale(1) !important;
+}
+
+/* Hover video preview, inline player, and player chrome composite
+   themselves onto their own layers (will-change / GPU compositing) so an
+   ancestor filter doesn't always cascade visually. Apply grayscale
+   directly to each player-related element. Covers the red progress bar,
+   blue "Includes paid promotion" bar, captions, and any other player UI
+   that shows up during hover previews. */
+html.yls-grayscale #inline-player,
+html.yls-grayscale #movie_player,
+html.yls-grayscale .html5-video-player,
+html.yls-grayscale ytd-video-preview,
+html.yls-grayscale ytd-moving-thumbnail-renderer,
+html.yls-grayscale yt-inline-player-view-model,
+html.yls-grayscale ytd-inline-player-renderer,
+html.yls-grayscale #mouseover-overlay,
+html.yls-grayscale .ytp-chrome-bottom,
+html.yls-grayscale .ytp-chrome-top,
+html.yls-grayscale .ytp-progress-bar,
+html.yls-grayscale .ytp-progress-bar-container,
+html.yls-grayscale .ytp-play-progress,
+html.yls-grayscale .ytp-load-progress,
+html.yls-grayscale .ytp-paid-content-overlay,
+html.yls-grayscale .ytp-paid-content-overlay-link,
+html.yls-grayscale .ytp-ad-text,
+html.yls-grayscale ytd-player-legacy-desktop-watch-ads-renderer {
+  filter: grayscale(1) !important;
+}
+
+/* Hide red "watched" progress bar on thumbnails while grayscale is on.
+   Covers both the new view-model element and the legacy Polymer renderer. */
+html.yls-grayscale yt-thumbnail-overlay-progress-bar-view-model,
+html.yls-grayscale .ytThumbnailOverlayProgressBarHost,
+html.yls-grayscale ytd-thumbnail-overlay-resume-playback-renderer {
+  display: none !important;
+}
+
+/* Desaturate the blue "new content" dots in the guide sidebar — only on the
+   subs page in default/native mode with grayscale on. In clean/minimal modes
+   the dots are already hidden entirely. */
+html.yls-grayscale.yls-on-subs.yls-native-mode ytd-guide-entry-renderer #newness-dot,
+html.yls-grayscale.yls-on-subs.yls-native-mode ytd-guide-entry-renderer .guide-newness-dot,
+html.yls-grayscale.yls-on-subs.yls-native-mode ytd-mini-guide-entry-renderer .guide-newness-dot {
+  background-color: var(--yt-spec-text-secondary, #aaa) !important;
+  filter: grayscale(1) !important;
+}
+
+/* ===========================================================================
+   Minimal mode — full-width list, titles only
+   ===========================================================================
+   Flatten the grid structure entirely and hide thumbnails via many selector
+   variants (YouTube is mid-migration to yt-*-view-model elements). */
+html.yls-on-subs.yls-minimal-mode ytd-browse:is([page-subtype="subscriptions"], [page-subtype="home"]) ytd-rich-grid-renderer,
+html.yls-on-subs.yls-minimal-mode ytd-browse:is([page-subtype="subscriptions"], [page-subtype="home"]) ytd-rich-grid-renderer > #contents,
+html.yls-on-subs.yls-minimal-mode ytd-browse:is([page-subtype="subscriptions"], [page-subtype="home"]) ytd-rich-grid-row,
+html.yls-on-subs.yls-minimal-mode ytd-browse:is([page-subtype="subscriptions"], [page-subtype="home"]) ytd-rich-grid-row > #contents {
+  display: block !important;
+  width: 100% !important;
+  max-width: none !important;
+  margin: 0 !important;
+  padding: 0 !important;
+  grid-template-columns: none !important;
+}
+
+/* Rich-item wrapper → flex row so our injected buttons sit inline. Generous
+   left/right padding so titles aren't flush against the sidebar and the
+   watched checkbox has room on the right. */
+html.yls-on-subs.yls-minimal-mode ytd-browse:is([page-subtype="subscriptions"], [page-subtype="home"]) ytd-rich-item-renderer {
+  display: flex !important;
+  flex-direction: row !important;
+  align-items: center !important;
+  gap: 12px !important;
+  box-sizing: border-box !important;
+  width: 100% !important;
+  max-width: 100% !important;
+  min-width: 0 !important;
+  margin: 0 !important;
+  padding: 12px 32px !important;
+  border-bottom: 1px solid var(--yt-spec-10-percent-layer, rgba(255, 255, 255, 0.08)) !important;
+  overflow: hidden !important;
+}
+html.yls-on-subs.yls-minimal-mode ytd-browse:is([page-subtype="subscriptions"], [page-subtype="home"]) ytd-rich-item-renderer:hover {
+  background: rgba(255, 255, 255, 0.04) !important;
+}
+
+/* The #content > yt-lockup-view-model chain fills the row. Every link in
+   the chain needs min-width:0 so the title's `white-space: nowrap` can
+   actually ellipsis instead of expanding the row. */
+html.yls-on-subs.yls-minimal-mode ytd-browse:is([page-subtype="subscriptions"], [page-subtype="home"]) ytd-rich-item-renderer > #content,
+html.yls-on-subs.yls-minimal-mode ytd-browse:is([page-subtype="subscriptions"], [page-subtype="home"]) ytd-rich-item-renderer > #content > yt-lockup-view-model,
+html.yls-on-subs.yls-minimal-mode ytd-browse:is([page-subtype="subscriptions"], [page-subtype="home"]) ytd-rich-item-renderer .ytLockupViewModelHost,
+html.yls-on-subs.yls-minimal-mode ytd-browse:is([page-subtype="subscriptions"], [page-subtype="home"]) ytd-rich-item-renderer .ytLockupViewModelMetadata,
+html.yls-on-subs.yls-minimal-mode ytd-browse:is([page-subtype="subscriptions"], [page-subtype="home"]) ytd-rich-item-renderer yt-lockup-metadata-view-model,
+html.yls-on-subs.yls-minimal-mode ytd-browse:is([page-subtype="subscriptions"], [page-subtype="home"]) ytd-rich-item-renderer .ytLockupMetadataViewModelHost,
+html.yls-on-subs.yls-minimal-mode ytd-browse:is([page-subtype="subscriptions"], [page-subtype="home"]) ytd-rich-item-renderer .ytLockupMetadataViewModelTextContainer,
+html.yls-on-subs.yls-minimal-mode ytd-browse:is([page-subtype="subscriptions"], [page-subtype="home"]) ytd-rich-item-renderer yt-content-metadata-view-model,
+html.yls-on-subs.yls-minimal-mode ytd-browse:is([page-subtype="subscriptions"], [page-subtype="home"]) ytd-rich-item-renderer .ytContentMetadataViewModelHost {
+  flex: 1 1 auto !important;
+  min-width: 0 !important;
+  width: auto !important;
+  max-width: 100% !important;
+  margin: 0 !important;
+  padding: 0 !important;
+  display: block !important;
+  overflow: hidden !important;
+}
+/* Constrain each metadata row so long channel names can't push things */
+html.yls-on-subs.yls-minimal-mode ytd-browse:is([page-subtype="subscriptions"], [page-subtype="home"]) ytd-rich-item-renderer .ytContentMetadataViewModelMetadataRow {
+  max-width: 100% !important;
+  overflow: hidden !important;
+  text-overflow: ellipsis !important;
+  white-space: nowrap !important;
+}
+
+/* ---- Hide the thumbnail entirely in minimal ----
+   View-model: a.ytLockupViewModelContentImage holds the whole thumbnail subtree.
+   Legacy Polymer: ytd-thumbnail / #thumbnail / yt-image. */
+html.yls-on-subs.yls-minimal-mode ytd-rich-item-renderer a.ytLockupViewModelContentImage,
+html.yls-on-subs.yls-minimal-mode ytd-rich-item-renderer yt-thumbnail-view-model,
+html.yls-on-subs.yls-minimal-mode ytd-rich-item-renderer yt-touch-feedback-shape,
+html.yls-on-subs.yls-minimal-mode ytd-rich-item-renderer ytd-thumbnail,
+html.yls-on-subs.yls-minimal-mode ytd-rich-item-renderer a#thumbnail,
+html.yls-on-subs.yls-minimal-mode ytd-rich-item-renderer #thumbnail,
+html.yls-on-subs.yls-minimal-mode ytd-rich-item-renderer yt-image,
+html.yls-on-subs.yls-minimal-mode ytd-rich-item-renderer ytd-moving-thumbnail-renderer {
+  display: none !important;
+  width: 0 !important;
+  height: 0 !important;
+}
+
+/* ---- Hide avatar, menu, badges in minimal ---- */
+html.yls-on-subs.yls-minimal-mode ytd-rich-item-renderer .ytLockupMetadataViewModelAvatar,
+html.yls-on-subs.yls-minimal-mode ytd-rich-item-renderer yt-decorated-avatar-view-model,
+html.yls-on-subs.yls-minimal-mode ytd-rich-item-renderer .ytLockupMetadataViewModelMenuButton,
+html.yls-on-subs.yls-minimal-mode ytd-rich-item-renderer #avatar-container,
+html.yls-on-subs.yls-minimal-mode ytd-rich-item-renderer #avatar-link,
+html.yls-on-subs.yls-minimal-mode ytd-rich-item-renderer yt-avatar-shape,
+html.yls-on-subs.yls-minimal-mode ytd-rich-item-renderer .yt-spec-avatar-shape,
+html.yls-on-subs.yls-minimal-mode ytd-rich-item-renderer #menu,
+html.yls-on-subs.yls-minimal-mode ytd-rich-item-renderer ytd-badge-supported-renderer,
+html.yls-on-subs.yls-minimal-mode ytd-rich-item-renderer ytd-hover-overlay-renderer {
+  display: none !important;
+}
+
+/* ---- Hide verified-channel checkmark next to channel name in list view.
+   View-model DOM renders the badge as an inline image/icon inside the
+   channel metadata row; legacy ytd-badge-supported-renderer is already
+   covered above. Scoped to metadata rows so title emojis aren't affected. */
+html.yls-on-subs.yls-minimal-mode ytd-rich-item-renderer .ytContentMetadataViewModelMetadataRow .ytAttributedStringInlineImageContainer,
+html.yls-on-subs.yls-minimal-mode ytd-rich-item-renderer .ytContentMetadataViewModelMetadataRow img.ytAttributedStringInlineImage,
+html.yls-on-subs.yls-minimal-mode ytd-rich-item-renderer .ytContentMetadataViewModelMetadataRow yt-icon,
+html.yls-on-subs.yls-minimal-mode ytd-rich-item-renderer .ytContentMetadataViewModelBadgeContainer,
+html.yls-on-subs.yls-minimal-mode ytd-rich-item-renderer .ytContentMetadataViewModelBadge {
+  display: none !important;
+}
+
+/* ---- Nuke the yt-icon-shape badge element on cards in grid + list views.
+   YT's current view-model uses <div class="yt-icon-shape ytSpecIconShapeHost">
+   for the verified-channel checkmark on the channel name line. */
+html.yls-on-subs.yls-clean-mode.yls-grid-hide-verified-badges ytd-rich-item-renderer .ytContentMetadataViewModelMetadataRow .yt-icon-shape.ytSpecIconShapeHost,
+html.yls-on-subs.yls-minimal-mode ytd-rich-item-renderer .yt-icon-shape.ytSpecIconShapeHost {
+  display: none !important;
+}
+
+/* ---- Title: single line, ellipsis (view-model + legacy) ---- */
+html.yls-on-subs.yls-minimal-mode ytd-rich-item-renderer a.ytLockupMetadataViewModelTitle,
+html.yls-on-subs.yls-minimal-mode ytd-rich-item-renderer .ytLockupMetadataViewModelHeadingReset,
+html.yls-on-subs.yls-minimal-mode ytd-rich-item-renderer h3.ytLockupMetadataViewModelHeadingReset,
+html.yls-on-subs.yls-minimal-mode ytd-rich-item-renderer #video-title,
+html.yls-on-subs.yls-minimal-mode ytd-rich-item-renderer #video-title-link {
+  font-size: 15px !important;
+  font-weight: 400 !important;
+  line-height: 1.4 !important;
+  white-space: nowrap !important;
+  overflow: hidden !important;
+  text-overflow: ellipsis !important;
+  -webkit-line-clamp: unset !important;
+  max-height: none !important;
+  display: block !important;
+  margin: 0 0 2px 0 !important;
+  width: 100% !important;
+  max-width: 100% !important;
+}
+html.yls-on-subs.yls-minimal-mode ytd-rich-item-renderer a.ytLockupMetadataViewModelTitle span {
+  white-space: nowrap !important;
+  overflow: hidden !important;
+  text-overflow: ellipsis !important;
+  display: inline !important;
+}
+
+/* Channel / metadata row: smaller, muted */
+html.yls-on-subs.yls-minimal-mode ytd-rich-item-renderer .ytContentMetadataViewModelMetadataRow,
+html.yls-on-subs.yls-minimal-mode ytd-rich-item-renderer #metadata-line {
+  font-size: 12px !important;
+  color: var(--yt-spec-text-secondary, #aaa) !important;
+}
+
+/* ---- Minimal mode: subtle divider between sidebar and list ----
+   A 1px border along the left edge of the main content column separates
+   the guide sidebar from the list so the text isn't visually flush. */
+html.yls-on-subs.yls-minimal-mode ytd-browse:is([page-subtype="subscriptions"], [page-subtype="home"]) ytd-two-column-browse-results-renderer #primary {
+  border-left: 1px solid var(--yt-spec-10-percent-layer, rgba(255, 255, 255, 0.12)) !important;
+  min-height: calc(100vh - 56px) !important;
+}
+
+/* ===========================================================================
+   Minimal mode — list-view metadata bar (channel | date | duration)
+   ===========================================================================
+   JS appends a <div class="yls-list-meta"> with three fixed-width spans to
+   each card. The card's flex layout lays them out to the right of the title
+   so all three columns align vertically across rows. Only visible in minimal
+   mode; grid/native modes hide the bar entirely. */
+.yls-list-meta { display: none; }
+
+html.yls-on-subs.yls-minimal-mode ytd-browse:is([page-subtype="subscriptions"], [page-subtype="home"]) ytd-rich-item-renderer .yls-list-meta {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  gap: 32px;
+  flex-shrink: 0;
+  color: var(--yt-spec-text-secondary, #aaa);
+  font-size: 13px;
+}
+html.yls-on-subs.yls-minimal-mode ytd-browse:is([page-subtype="subscriptions"], [page-subtype="home"]) ytd-rich-item-renderer .yls-list-channel {
+  width: 200px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+html.yls-on-subs.yls-minimal-mode ytd-browse:is([page-subtype="subscriptions"], [page-subtype="home"]) ytd-rich-item-renderer .yls-list-date {
+  width: 80px;
+  text-align: right;
+  white-space: nowrap;
+}
+html.yls-on-subs.yls-minimal-mode ytd-browse:is([page-subtype="subscriptions"], [page-subtype="home"]) ytd-rich-item-renderer .yls-list-duration {
+  width: 64px;
+  text-align: right;
+  font-variant-numeric: tabular-nums;
+  white-space: nowrap;
+}
+
+/* Hide the native stacked metadata (channel row + views/time row) in minimal
+   mode since our injected bar carries the same info horizontally. Matches
+   specificity of the earlier `display: block !important` chain so it wins. */
+html.yls-on-subs.yls-minimal-mode ytd-browse:is([page-subtype="subscriptions"], [page-subtype="home"]) ytd-rich-item-renderer yt-content-metadata-view-model,
+html.yls-on-subs.yls-minimal-mode ytd-browse:is([page-subtype="subscriptions"], [page-subtype="home"]) ytd-rich-item-renderer .ytContentMetadataViewModelHost,
+html.yls-on-subs.yls-minimal-mode ytd-browse:is([page-subtype="subscriptions"], [page-subtype="home"]) ytd-rich-item-renderer #metadata-line,
+html.yls-on-subs.yls-minimal-mode ytd-browse:is([page-subtype="subscriptions"], [page-subtype="home"]) ytd-rich-item-renderer #metadata {
+  display: none !important;
+}

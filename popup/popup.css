@@ -1,0 +1,73 @@
+:root {
+  color-scheme: dark;
+  font-family: Roboto, Arial, sans-serif;
+}
+* { box-sizing: border-box; }
+body {
+  width: 320px;
+  margin: 0;
+  color: #f1f1f1;
+  background: #212121;
+}
+main { padding: 18px 14px 12px; }
+header { padding: 0 6px 12px; }
+h1 {
+  margin: 0 0 2px;
+  font-size: 20px;
+  line-height: 26px;
+}
+p, footer {
+  margin: 0;
+  color: #aaa;
+  font-size: 12px;
+  line-height: 17px;
+}
+#settings {
+  padding: 6px;
+  border: 1px solid rgba(255,255,255,.08);
+  border-radius: 14px;
+  background: rgba(255,255,255,.04);
+}
+.setting {
+  width: 100%;
+  min-height: 42px;
+  padding: 8px 9px;
+  border: 0;
+  border-radius: 9px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 14px;
+  color: inherit;
+  background: transparent;
+  font: inherit;
+  text-align: left;
+  cursor: pointer;
+}
+.setting:hover, .setting:focus-visible {
+  outline: none;
+  background: rgba(255,255,255,.09);
+}
+.label { font-size: 13px; line-height: 18px; }
+.switch {
+  width: 32px;
+  height: 20px;
+  padding: 3px;
+  border-radius: 10px;
+  flex: 0 0 auto;
+  background: rgba(255,255,255,.18);
+}
+.knob {
+  width: 14px;
+  height: 14px;
+  border-radius: 50%;
+  display: block;
+  background: #aaa;
+  transition: transform 120ms ease, background 120ms ease;
+}
+.setting[aria-pressed="true"] .switch { background: #3ea6ff; }
+.setting[aria-pressed="true"] .knob {
+  background: #fff;
+  transform: translateX(12px);
+}
+footer { padding: 11px 6px 0; }
