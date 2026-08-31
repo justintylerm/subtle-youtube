@@ -44,6 +44,10 @@ Grid view can be tailored to show only the information you care about.
 - Hide multi-creator and collaboration uploads
 - Disable autoplay thumbnail previews
 
+<p align="center">
+  <img src="assets/grid-settings.jpg" alt="Subtle for YouTube Grid settings for hiding avatars, view counts, autoplay previews, multi-creator uploads, livestreams, and verified badges" width="318">
+</p>
+
 ### Grayscale mode
 
 Use the half-tone circle in YouTube's header to desaturate the Subscriptions page. Grayscale mode quiets colorful thumbnails and previews with one click, and it works independently of the selected feed layout.
